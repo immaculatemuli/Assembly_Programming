@@ -1,240 +1,227 @@
-# COMPUTER GRAPHICS CAT - 14-Floor Commercial Building Design (CT Tower)
+# BIT 4220 — Task 1: Assembly Environment & Digital Representation Toolkit
 
-## Student Information
-- **Name:** [Your Full Name]
-- **Registration Number:** [Your Reg No]
-- **Course:** Computer Graphics - Practical CAT
-- **Institution:** Mt. Kenya University
-- **Date:** 2025
+## Overview
+This repository contains two NASM x86-64 assembly programs built for a Linux
+environment, demonstrating:
 
----
+1. `hello.asm` — a minimal "Hello World" program showing the basic structure
+   of a NASM program and the `write`/`exit` Linux system calls.
+2. `data_types.asm` — a program that stores byte, word and doubleword sized
+   data and prints their ASCII interpretation, raw hex bytes, and
+   demonstrates little-endian storage and two's complement representation.
 
-## Project Overview
-This project contains the complete architectural and MEP (Mechanical, Electrical, Plumbing)
-plans for a 14-floor commercial building — **CT Tower** — designed using AutoCAD.
-The submission includes a floor plan, electrical wiring layout, water & plumbing plan,
-and Wi-Fi & network cabling plan, all drawn to scale with proper layering and symbols.
+## Environment Setup (WSL / Ubuntu / Debian-based Linux)
 
----
+Install the required toolchain:
 
-## Files Included
+```bash
+sudo apt update
+sudo apt install -y nasm gdb binutils build-essential
+```
 
-| File | Type | Description |
-|------|------|-------------|
-| `CT_Tower__2_.dwg` | AutoCAD DWG | Master editable drawing file containing all plans |
-| `FloorPlan.PNG` | Image | Architectural floor plan of a typical floor |
-| `ElectricalPlan.PNG` | Image | Full electrical wiring layout |
-| `ElecricalPlanPanelBox.PNG` | Image | Zoomed-in view of electrical panel box area |
-| `ElecricalPlanKey.PNG` | Image | Electrical symbols legend/key |
-| `PlumbingPlan.PNG` | Image | Full water supply and plumbing layout |
-| `PlumbingPlanLeft.PNG` | Image | Zoomed-in left section of plumbing plan |
-| `PlumbingPlanRight.PNG` | Image | Zoomed-in right section of plumbing plan |
-| `PlumbingPlanKey.PNG` | Image | Plumbing symbols legend/key |
-| `WIFIPlan.PNG` | Image | Wi-Fi and network cabling layout |
-| `WIFIPlanKey.PNG` | Image | Wi-Fi and networking symbols legend/key |
+Verify installation:
 
----
+```bash
+nasm -v          # NASM version 2.x
+gdb --version    # GNU gdb
+ld --version     # GNU linker
+objdump --version
+```
 
-## Drawing Components
+## Repository Structure
 
----
+```
+task1/
+├── hello.asm           # Hello world program
+├── data_types.asm      # Byte/word/dword + ASCII + endianness demo
+├── Makefile             # Build automation
+└── README.md             # This file
+```
 
-### (a) Floor Plan — `FloorPlan.PNG`
-The floor plan shows the typical layout of one floor of the CT Tower building.
+## Build Process
 
-**Features included:**
-- Structural walls with correct line weights
-- Doors with swing directions shown
-- Windows along exterior walls
-- Staircase on the left end of the building
-- Elevator/shaft on the right end of the building
-- Corridor running centrally along the full length of the floor
-- Office rooms on both sides of the corridor
-- Washroom/toilet blocks with fixtures (WCs and sinks)
-- Proper labeling and dimensions
+### Option A — Using the Makefile (recommended)
 
-**Layers Used:**
+```bash
+make            # builds both hello and data_types
+make run        # builds and runs both programs
+make clean      # removes object files and binaries
+```
 
-| Layer | Description |
-|-------|-------------|
-| WALLS | Structural and partition walls |
-| DOORS | Door blocks with swing arcs |
-| WINDOWS | Window openings along walls |
-| STAIRS | Staircase layout |
-| DIMENSIONS | All dimension lines and text |
-| TEXT | Room labels and annotations |
+### Option B — Manual build (step by step)
 
----
+Each program is built in two stages: **assemble** (NASM converts `.asm`
+source into an ELF object file) then **link** (`ld` converts the object
+file into an executable).
 
-### (b) Electrical Wiring Layout — `ElectricalPlan.PNG`, `ElecricalPlanPanelBox.PNG`, `ElecricalPlanKey.PNG`
+```bash
+# Assemble
+nasm -f elf64 hello.asm -o hello.o
 
-The electrical plan shows the full wiring distribution across the floor.
+# Link
+ld hello.o -o hello
 
-**Features included:**
-- Main electrical panels (LP-A-1, LP-A-2, LP-A-3, LP-B-1, LP-B-2, LP-B-4) distributed across the floor
-- Ceiling light fixtures in every room and along the corridor
-- Wall outlets (socket points) positioned along room walls
-- Single pole switches and 2-way switches at room entry points
-- Wiring routes connecting panels to all lighting and socket points
-- Complete electrical legend showing all symbols used
+# Run
+./hello
+```
 
-**Symbols Legend:**
+```bash
+nasm -f elf64 data_types.asm -o data_types.o
+ld data_types.o -o data_types
+./data_types
+```
 
-| Symbol | Meaning |
-|--------|---------|
-| Cross with square | Wiring point |
-| Hourglass (yellow) | Electrical Panel |
-| Rectangle (yellow) | Ceiling Light |
-| Circle with line | Wall Outlet |
-| $ symbol | Single Pole Switch |
-| $₃ symbol | 2-Way Switch |
+**What each flag means:**
+| Command/Flag | Meaning |
+|---|---|
+| `-f elf64` | Tells NASM to produce a 64-bit ELF object file format |
+| `-o file.o` | Output object file name |
+| `ld file.o -o file` | Links the object file into a standalone executable named `file` |
 
-**Layers Used:**
+## Expected Output
 
-| Layer | Description |
-|-------|-------------|
-| ELECTRICAL | Main wiring lines |
-| LIGHTING | Ceiling light fixtures |
-| PANELS | Distribution panel boxes |
-| SWITCHES | Switch positions |
+```
+$ ./hello
+Hello, BIT4220 students! Welcome to Assembly.
 
----
+$ ./data_types
+Byte  (1 byte)  as char       : A
+Word  (2 bytes) low byte char : C
+Dword (4 bytes) as 4 chars    : GFED
+Dword raw bytes in hex (LE)   : 47 46 45 44
+neg_val (-5) raw bytes (hex)  : FB FF FF FF
+```
 
-### (c) Water Supply & Plumbing Plan — `PlumbingPlan.PNG`, `PlumbingPlanLeft.PNG`, `PlumbingPlanRight.PNG`, `PlumbingPlanKey.PNG`
+## Debugging & Memory Inspection Evidence
 
-The plumbing plan shows the complete water supply and drainage system for the floor.
+### Using GDB
 
-**Features included:**
-- Cold Water Riser (CW RISER) — water supplied from rooftop tank, entering from the top-left
-- Horizontal soil pipes (green, 0.50mm) running along the top of the floor serving all WC fixtures
-- Horizontal waste pipes (green, 0.35mm) running along the lower corridor serving washbasins and sinks
-- Soil Stack/Vent connections dropping down to sewer and venting upward
-- Waste Stack/Vent connections for smaller waste fixtures
-- Clean-out (CO) access points provided at key locations
-- WC (toilet) fixtures connected to soil pipe
-- Washbasin fixtures connected to waste pipe
-- Sink/basin units in office washroom areas
+```bash
+gdb ./data_types
+```
 
-**Symbols Legend:**
+Inside GDB:
 
-| Symbol | Meaning |
-|--------|---------|
-| Blue circle with X | Cold Water Riser (from Rooftop Tank) |
-| Green rough circle (large) | Soil Stack/Vent — 0.50mm (Down to Sewer, Up to Vent) |
-| Green rough circle (small) | Waste Stack/Vent — 0.35mm (Down to Sewer, Up to Vent) |
-| Blue line | Water Pipe |
-| Green line (thick) | Soil Pipe — 0.50mm |
-| Green line (thin) | Waste Pipe — 0.35mm |
-| CO text | Clean Out access point |
+```
+(gdb) break _start
+(gdb) run
+(gdb) x/8xb &my_dword      # examine 8 bytes in hex starting at my_dword
+(gdb) x/1xw &my_dword      # examine the same memory as one 4-byte word
+(gdb) x/4xb &neg_val       # examine the two's complement representation
+(gdb) info registers
+(gdb) stepi                # step one instruction at a time
+(gdb) quit
+```
 
-**Layers Used:**
+**Sample captured output:**
 
-| Layer | Description |
-|-------|-------------|
-| WATER-PIPES | Cold water supply lines (blue) |
-| SOIL-PIPES | Soil drain pipes 0.50mm (green thick) |
-| WASTE-PIPES | Waste drain pipes 0.35mm (green thin) |
-| PLUMBING-FIXTURES | WCs, basins, sinks |
-| RISERS | Vertical riser shafts |
+```
+(gdb) x/8xb &my_dword
+0x402003:  0x47  0x46  0x45  0x44  0x05  0x00  0x00  0x00
 
----
+(gdb) x/1xw &my_dword
+0x402003:  0x44454647
 
-### (d) Wi-Fi & Network Cabling Plan — `WIFIPlan.PNG`, `WIFIPlanKey.PNG`
+(gdb) x/4xb &neg_val
+0x40200b:  0xfb  0xff  0xff  0xff
+```
 
-The network plan shows the complete Wi-Fi coverage and data cabling layout for the floor.
+> **Screenshot placeholder:** Insert a screenshot of this GDB session here
+> (`x/8xb`, `x/1xw`, and `x/4xb` output) as required by the assignment
+> deliverable "Use GDB or objdump to inspect memory layout and show
+> evidence through screenshots."
 
-**Features included:**
-- Network Tray (cyan/light blue) running centrally along the full corridor length as the network backbone
-- Network Racks (orange/red rectangles) located at two points on the floor for distribution
-- Wi-Fi Access Points (solid green circles) mounted at regular intervals along the corridor ceiling
-- AP Coverage Range (dashed green circles) showing full coverage across all rooms on both sides
-- RJ45 Data Outlets (small squares/magenta) in each room for wired connections
-- Data cables routed from the network tray to access points and outlets
-- Coverage circles confirm full floor Wi-Fi coverage with overlapping access point ranges
+**Interpretation:** `my_dword` was declared as `dd 0x44454647`. GDB shows the
+actual bytes in memory are `47 46 45 44` — reversed from how the value is
+written in source. This is direct evidence of **little-endian** storage: the
+least-significant byte (`0x47`) is stored at the lowest memory address.
 
-**Symbols Legend:**
+Similarly, `neg_val = -5` is stored as `0xfb 0xff 0xff 0xff`, which read as a
+32-bit little-endian word is `0xFFFFFFFB` — the **two's complement**
+representation of -5.
 
-| Symbol | Meaning |
-|--------|---------|
-| Orange/red rectangle | Network Rack |
-| Cyan thick line | Network Tray (cable backbone) |
-| Blue line | Data Cable |
-| Solid green circle | Access Point (AP) |
-| Small square (magenta) | RJ45 Data Outlet |
-| Dashed green circle | AP Coverage Range |
+### Using objdump
 
-**Layers Used:**
+```bash
+# Disassemble the program's instructions
+objdump -d data_types
 
-| Layer | Description |
-|-------|-------------|
-| NETWORK-TRAY | Main network backbone tray (cyan) |
-| NETWORK-RACK | Server/distribution rack positions |
-| ACCESS-POINTS | WiFi AP locations |
-| AP-RANGE | Coverage radius circles |
-| DATA-OUTLETS | RJ45 outlet positions |
-| DATA-CABLES | Cable routing lines |
+# Dump the raw bytes of the .data section
+objdump -s -j .data data_types
+```
 
----
+**Sample captured output:**
 
-### (e) Presentation & Professionalism
+```
+$ objdump -s -j .data data_types
 
-- All plans drawn on separate, clearly named layers
-- Consistent use of AutoCAD standard line weights and colors
-- Each plan includes a legend/key explaining all symbols used
-- North direction compass included on electrical plan
-- Panel box references labeled (LP-A-1, LP-A-2, LP-B-1, etc.)
-- Plumbing pipe sizes labeled (0.50mm soil, 0.35mm waste)
-- CW Riser entry point clearly marked
-- Access points labeled with coverage zones drawn to scale
-- All drawings exported as high-resolution PNG previews
-- Master file submitted as `.dwg` for full editability
+data_types:     file format elf64-x86-64
 
----
+Contents of section .data:
+ 402000 41434247 46454405 000000fb ffffff42  ACBGFED........B
+ 402010 79746520 20283120 62797465 29202061  yte  (1 byte)  a
+ ...
+```
 
-## How to Open the Drawing
+> **Screenshot placeholder:** Insert a screenshot of the `objdump -s -j
+> .data` output here, alongside `objdump -d` showing disassembled
+> instructions, as evidence for the deliverable.
 
-1. Open **AutoCAD 2018 or later**
-2. Go to **File → Open** and select `CT_Tower__2_.dwg`
-3. Use the **Layer Manager** (LA command) to toggle between plans:
-   - Turn on `ELECTRICAL` layers to view wiring plan
-   - Turn on `PLUMBING` layers to view water/drainage plan
-   - Turn on `NETWORK` layers to view Wi-Fi plan
-   - Turn on `WALLS`, `DOORS`, `WINDOWS` for floor plan view
+The first 15 bytes of `.data` (`41 43 42 47 46 45 44 05 00 00 00 fb ff ff
+ff`) correspond exactly to: `my_byte` (`41`), `my_word` low byte (`43`),
+`my_dword` four bytes (`47 46 45 44`), `pos_val` (`05 00 00 00`), and
+`neg_val` (`fb ff ff ff`) — confirming the program's data layout matches
+what was declared in source.
 
----
+### Using readelf (alternative cross-check)
 
-## Plan Previews
+```bash
+readelf -x .data data_types
+```
 
-### Floor Plan
-![Floor Plan](FloorPlan.PNG)
+This produces the same raw hex dump as `objdump -s` and can be used as a
+second source of evidence.
 
-### Electrical Plan
-![Electrical Plan](ElectricalPlan.PNG)
+## Tutorial for Other Students: Compile, Link & Run a NASM Program
 
-### Electrical Panel Detail
-![Electrical Panel Box](ElecricalPlanPanelBox.PNG)
+If you are new to NASM on Linux/WSL, follow these steps for any program in
+this repository:
 
-### Electrical Key
-![Electrical Key](ElecricalPlanKey.PNG)
+1. **Write or open your `.asm` file** in a text editor (e.g. `nano`, VS
+   Code).
+2. **Assemble it** — this turns human-readable assembly into machine code
+   stored in an object file:
+   ```bash
+   nasm -f elf64 yourprogram.asm -o yourprogram.o
+   ```
+3. **Link it** — this takes the object file and produces a runnable
+   executable, resolving things like the entry point (`_start`):
+   ```bash
+   ld yourprogram.o -o yourprogram
+   ```
+4. **Run it**:
+   ```bash
+   ./yourprogram
+   ```
+5. **If something goes wrong**, common issues are:
+   - Forgetting `global _start` at the top of `.text` — the linker won't
+     know where the program begins.
+   - Mismatched `-f elf64` flag if you're on a 32-bit system (use `-f
+     elf32` instead, and adjust registers to 32-bit forms).
+   - A `Segmentation fault` usually means a syscall was given a bad
+     pointer or length — double check `rsi`/`rdx` before `syscall`.
+6. **To debug**, use `gdb ./yourprogram` and set a breakpoint at `_start`
+   before stepping through instructions one at a time with `stepi`.
 
-### Plumbing Plan
-![Plumbing Plan](PlumbingPlan.PNG)
+This same four-step pipeline (assemble → link → run → debug) applies to
+every program in this repository and in later tasks.
 
-### Plumbing Plan - Left Section
-![Plumbing Left](PlumbingPlanLeft.PNG)
+## Deliverables Checklist
 
-### Plumbing Plan - Right Section
-![Plumbing Right](PlumbingPlanRight.PNG)
-
-### Plumbing Key
-![Plumbing Key](PlumbingPlanKey.PNG)
-
-### Wi-Fi & Network Plan
-![WiFi Plan](WIFIPlan.PNG)
-
-### Wi-Fi & Network Key
-![WiFi Key](WIFIPlanKey.PNG)
-
----
-
-*Submitted in partial fulfillment of the Computer Graphics CAT — Mt. Kenya University*
+- [x] `hello.asm` — hello world program
+- [x] `data_types.asm` — byte/word/dword storage + ASCII interpretation
+- [x] `Makefile` — build automation
+- [x] README with setup steps, commands, and GDB/objdump evidence
+- [ ] Screenshots of GDB and objdump sessions (to be added by group —
+      see placeholders above)
+- [x] Two-page technical note on data representation (`technical_note.md`)
