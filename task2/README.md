@@ -1,4 +1,7 @@
 # BIT 4220 — Task 2: Student Marks Processor Using Registers and Addressing Modes
+"We were required to write an assembly program that processes 12 student marks using registers and addressing modes. We have two programs — marks.asm which runs on real marks, and marks_boundary_test.asm which tests edge values to prove the classification logic is correct.
+The program computes the total by looping through the array using indexed addressing. It finds the average using the DIV instruction. It finds highest and lowest using based addressing — where register rsi holds the array's address at runtime. It classifies marks using indirect addressing — a pointer in rdi that moves through the array one mark at a time.
+We used GDB to pause the program mid-execution and prove that rsi holds address 0x402000 — the exact location of the marks array. We used objdump to confirm the symbol table and the raw data stored in memory."
 
 ## Overview
 This repository folder contains a NASM x86-64 assembly program built for a
