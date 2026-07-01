@@ -1,4 +1,5 @@
 # Task 2 — Technical Note: Memory Map, Addressing Modes & Indexing Comparison
+An assembly program is organised into three main sections. The .data section holds initialised data — values known before the program runs, such as the marks array and output strings. The .bss section holds uninitialised data — memory reserved for variables that will be computed at runtime, such as the total, average, and classification counts. The .text section contains the executable instructions — all the code the CPU will actually run, including loops, comparisons, and subroutines. The entry point _start is declared in .text using the global directive.
 
 ## 1. Memory Map
 
